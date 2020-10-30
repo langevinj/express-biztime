@@ -71,21 +71,45 @@ router.post("/", async function(req, res, next){
 //Updates an invoice, returns {invoice: {id, comp_code, amt, paid, add_date, paid_date}}
 router.put("/:id", async function (req, res, next){
     try {
-        if((Object.keys(req.body).length != 1 || Object.keys(req.body)[0] != 'amt')){
+        if((Object.keys(req.body).length != 2 || Object.keys(req.body)[0] != 'amt' || Object.keys(req.body)[1] != "paid")){
             throw new ExpressError("Not allowed", 400)
         }
+
+        const { amt, paid } = req.body;
+
         const result = await db.query(
             `UPDATE invoices
-             SET amt=$1
-             WHERE id=$2
-             RETURNING id, comp_code, amt, paid, add_date, paid_date`,
-             [req.body.amt, req.params.id]);
-        
+                SET amt=$1,
+                paid=$2
+                WHERE id = $3
+                RETURNING id, comp_code, amt, paid, add_date, paid_date`,
+             [amt, paid, req.params.id]);
+
         if(result.rows.length === 0){
             throw new ExpressError(`Invoice with id ${req.params.id} cannot be found`, 404)
+        };
+        
+        let updatedResult;
+        if(paid == true && result.rows[0].paid_date == null){
+            updatedResult = await db.query(
+                `UPDATE invoices
+                SET paid_date=CURRENT_DATE
+                WHERE id=${req.params.id}
+                RETURNING id, comp_code, amt, paid, add_date, paid_date`
+            );
+        } else if (paid == false && result.rows[0].paid_date != null){
+            console.log("hit")
+            updatedResult = await db.query(
+                `UPDATE invoices
+                SET paid_date=null
+                WHERE id=${req.params.id}
+                RETURNING id, comp_code, amt, paid, add_date, paid_date`
+            );
+        } else {
+            return res.json({ invoice: result.rows[0] })
         }
 
-        return res.json({invoice: result.rows[0]})
+        return res.json({invoice: updatedResult.rows[0]})
     } catch(e) {
         return next(e);
     }
