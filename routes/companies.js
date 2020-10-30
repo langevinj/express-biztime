@@ -2,6 +2,7 @@
 
 const express = require("express");
 const router = new express.Router();
+const slugify = require("slugify");
 const db = require("../db")
 const ExpressError = require("../expressError")
 
@@ -45,9 +46,33 @@ router.get("/:code", async function (req, res, next) {
 });
 
 //Adds a company
-router.post("/", async function (req, res, next){
-    try{
-        const { code, name, description } = req.body;
+// router.post("/", async function (req, res, next){
+//     try{
+//         const { code, name, description } = req.body;
+
+//         const result = await db.query(
+//             `INSERT INTO companies (code, name, description)
+//              VALUES ($1, $2, $3)
+//              RETURNING code, name, description`,
+//             [code, name, description]
+//         );
+
+//         return res.status(201).json(result.rows[0]);
+//     } 
+//     catch (err) {
+//         return next(err);
+//     }
+// });
+
+//Adds a company, uses slugify for the code, THIS ROUTE HAS NOT BEEN ADDED TO TESTS
+router.post("/", async function (req, res, next) {
+    try {
+        const { name, description } = req.body;
+
+        const code = slugify(name, {
+            replacement: "",
+            lower: true
+        });
 
         const result = await db.query(
             `INSERT INTO companies (code, name, description)
@@ -57,13 +82,13 @@ router.post("/", async function (req, res, next){
         );
 
         return res.status(201).json(result.rows[0]);
-    } 
+    }
     catch (err) {
         return next(err);
     }
 });
 
-//Edits existing company
+// Edits existing company
 router.put("/:code", async function (req, res, next){
     try{
         if("code" in req.body){
