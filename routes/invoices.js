@@ -1,7 +1,6 @@
 /**Invoice routes */
 
 const express = require("express");
-const { route } = require("../app");
 const router = new express.Router();
 const db = require("../db")
 const ExpressError = require("../expressError")
@@ -36,6 +35,7 @@ router.get("/:id", async function(req, res, next){
         }
 
         let data = result.rows[0]
+
         return res.json({invoice: 
             {id: data.id, amt: data.amt, paid: data.paid, add_date: data.add_date, paid_date: data.paid_date, company: {code: data.code, name: data.name, description: data.description}}
         });
