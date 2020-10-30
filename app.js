@@ -2,12 +2,13 @@
 
 
 const express = require("express");
-
 const app = express();
-const ExpressError = require("./expressError")
+const cRoutes = require("./routes/companies");
+const ExpressError = require("./expressError");
 
 app.use(express.json());
 
+app.use("/companies", cRoutes)
 
 /** 404 handler */
 
@@ -29,3 +30,7 @@ app.use((err, req, res, next) => {
 
 
 module.exports = app;
+
+app.listen(3000, function() {
+  console.log("Server is listening on port 3000")
+})
