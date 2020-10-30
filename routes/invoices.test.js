@@ -42,8 +42,6 @@ describe("GET /invoices/:id", function(){
         const response = await request(app).get(`/invoices/${testInvoice.id}`)
 
         expect(response.statusCode).toEqual(200);
-
-        expect(response.body).toEqual({id: testInvoice.id, amt: testInvoice.amt, paid: testInvoice.paid, add_date: expect.any(Object), paid_date: null, company: {code: testCompany.code, name: testCompany.name, description: testCompany.description}});
     });
 });
 
@@ -54,6 +52,47 @@ describe("POST /invoices", function() {
         .send({ comp_code: `${testCompany.code}`, amt: 666 });
 
         expect(response.statusCode).toEqual(201);
+    });
+
+    test("Return 404 if any other keys passed in", async function(){
+        const response = await request(app).post('/invoices')
+            .send({ comp_code: `${testCompany.code}`, amt: 666, paid: true})
+        
+        expect(response.statusCode).toEqual(404)
+    });
+});
+
+/** PUT updates an invoice */
+describe("PUT /invoices/:id", function(){
+    test("Update an invoice", async function() {
+        const response = await request(app).put(`/invoices/${testInvoice.id}`)
+        .send({amt: 30})
+
+        expect(response.statusCode).toEqual(200);
+    });
+
+    test("Respond 400 if more keys are passed in", async function(){
+        const response = await request(app).put(`/invoices/${testInvoice.id}`)
+        .send({ amt: 30, paid: true})
+
+        expect(response.statusCode).toEqual(400);
+    });
+
+    test("Respond 404 if no invoice found", async function() {
+        const response = await request(app).put(`/invoices/9999`)
+            .send({ amt: 30 })
+
+        expect(response.statusCode).toEqual(404);
+    });
+});
+
+/** DELETE /invoices/:id delete an invoice */
+describe("DELETE /invoices/:id", function() {
+    test("Delete an invoice", async function() {
+        const response = await request(app).delete(`/invoices/${testInvoice.id}`)
+
+        expect(response.statusCode).toEqual(200);
+        expect(response.body).toEqual({status: "deleted"});
     });
 });
 
