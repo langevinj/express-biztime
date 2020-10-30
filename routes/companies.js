@@ -101,7 +101,7 @@ router.delete("/:code", async function(req, res, next){
 
         if(result.rows.length == 0){
             let notFoundError = new Error(`No company with code ${req.params.code}`)
-            notFoundError.status = 400;
+            notFoundError.status = 404;
             throw notFoundError
         }
 
