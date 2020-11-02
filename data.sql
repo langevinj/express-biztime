@@ -24,7 +24,7 @@ CREATE TABLE invoices (
 
 CREATE TABLE industries (
   code text PRIMARY KEY,
-  industry text NOT NULL
+  name text NOT NULL
 );
 
 CREATE TABLE company_industry (
@@ -51,6 +51,7 @@ INSERT INTO industries (
 
 INSERT INTO company_industry (
   VALUES('tech', 'apple'),
-  ('com', 'apple')
+  ('com', 'apple'),
+  ('com', 'ibm')
 );
 
