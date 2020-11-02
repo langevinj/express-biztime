@@ -25,10 +25,17 @@ router.get("/:code", async function (req, res, next) {
         const code = req.params.code;
 
         const result = await db.query(
-            `SELECT code, name, description 
+            `SELECT code, name, description
              FROM companies
              WHERE code='${code}'
             `
+        );
+
+        const i_codes = await db.query(
+            `SELECT industry_code
+            FROM companies
+            RIGHT JOIN company_industry on companies.code = company_industry.company_code
+            WHERE code='${code}'`
         );
         
         //Throw 404 error if company code does not exist in table
@@ -38,7 +45,14 @@ router.get("/:code", async function (req, res, next) {
             throw notFoundError;
         }
 
-        return res.json({company: result.rows[0]})
+        let all_industry_codes = []
+        for(x in i_codes.rows){
+            all_industry_codes.push(i_codes.rows[x]['industry_code'])
+        }
+
+        const company_info = result.rows[0]
+        company_info['industry_code'] = all_industry_codes;
+        return res.json({company: company_info})
 
     } catch (err) {
         return next(err);
